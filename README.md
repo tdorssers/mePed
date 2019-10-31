@@ -1,10 +1,10 @@
 # mePed
-[mePed v2](http://www.meped.io/mepedv2) obstacle avoiding quadruped robot.
+[mePed v2](http://www.meped.io/mepedv2) obstacle avoiding remote controlled light sensitive quadruped robot
 
 ## Overview
 The quadruped robot uses the HC-SR04 module as eyes and it uses the LDRs to sense light. The HC-SR04 module is connected to PCINT10 and uses the 8-bit Timer0 interrupt to measure RTT. The LDRs are connected to ADC0 and ADC1.
 
-When an obstacle is detected within 30 cm distance, the robot turns into the brightest direction, using the magnetic heading to turn at least 75 degrees. When an obstacle is detected ahead within 15 cm distance, the robot reverses until no obstacle is detected within 30 cm distance and then turns to the brightest direction. The walking speed, robot height and leg positions are adjustable. Debugging data is sent to the hardware UART.
+When an obstacle is detected within 30 cm distance, the robot turns in the brightest direction, using the magnetic heading to turn at least 75 degrees. When an obstacle is detected ahead within 15 cm distance, the robot reverses until no obstacle is detected within 30 cm distance and then turns to the brightest direction. The walking speed, robot height and leg positions are adjustable. Debugging data is sent to the hardware UART.
 
 Eight servos are connected to PORTD and PORTB and are driven by a software PWM implementation using the 16-bit Timer1 output compare interrupt.
 
@@ -71,8 +71,13 @@ OK | 16726215 | Autonomous gait algorithm
 8 | 16754775 | Bow
 9 | 16748655 | Unused
 
+## Build
+The robot is built using a mePed body and the hardware listed is connected according to the schematic.
+
+![](media/mePed.jpg)
+
 ## Firmware
-The firmware has been developed in Atmel Studio 7 using GCC C and can be uploaded to the ATmega32P using the ISP connector and an ISP programmer such as [USBasp tool](http://www.fischl.de/usbasp/) using [avrdude](http://www.nongnu.org/avrdude/):
+The firmware has been developed in Atmel Studio 7 using GCC C and can be uploaded to the ATmega328P using the ISP connector and an ISP programmer such as [USBasp tool](http://www.fischl.de/usbasp/) using [avrdude](http://www.nongnu.org/avrdude/):
 
 `avrdude -p m328p -c usbasp -U flash:w:mePed.hex:i -U hfuse:w:0xD9:m -U lfuse:w:0xDE:m`
 
