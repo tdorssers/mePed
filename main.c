@@ -9,19 +9,20 @@
  * The quadruped robot uses the HC-SR04 module as eyes and it uses the LDRs to
  * sense light. The HC-SR04 module is connected to PCINT10 and uses the 8-bit
  * Timer0 interrupt to measure RTT. The LDRs are connected to ADC0 and ADC1.
- * When an obstacle is detected within 30 cm distance, the robot turns into the
+ * When an obstacle is detected within 30 cm distance, the robot turns in the
  * brightest direction, using the magnetic heading to turn at least 75 degrees.
  * When an obstacle is detected ahead within 15 cm distance, the robot reverses
- * until no obstacle is detected within 30 cm distance and then turns to the
+ * until no obstacle is detected within 30 cm distance and then turns in the
  * brightest direction. The walking speed, robot height and leg positions are
- * adjustable.
+ * adjustable. Debugging data is sent to the hardware UART.
  * Eight servos are connected to PORTD and PORTB and are driven by a software
  * PWM implementation using the 16-bit Timer1 output compare interrupt.
  * The IR remote receiver uses the 8-bit Timer2 interrupt to collect data.
  * Hardware I2C is used to read out the QMC5883L sensor. The raw readings are
  * converted to a heading in degrees. Automatic scaling and centering data is
- * stored in EEPROM. Debugging data is sent to the hardware UART.
- * The robot can be controlled with an IR remote control and RS232 or BT.
+ * stored in EEPROM. At first run, make sure the robot makes a complete circle
+ * manually by using the right or left button.
+ * The robot can be controlled with an IR remote control or by the UART.
  */ 
 
 #define F_CPU 16000000
@@ -34,6 +35,7 @@
 #include <avr/eeprom.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include "uart.h"
 #include "servo.h"
 #include "irremote.h"
@@ -249,6 +251,7 @@ static void magneto_getraw(int16_t *x, int16_t *y, int16_t *z) {
 	i2c_stop();
 }
 
+// Initialize measurement boundaries from EEPROM
 static void init_eeprom(void) {
 	if (eeprom_read_word(&nv_magic) == 0xaa55) {
 		xlow = eeprom_read_word(&nv_xlow);
@@ -259,6 +262,7 @@ static void init_eeprom(void) {
 		eeprom_update_word(&nv_magic, 0xaa55);
 }
 
+// Write measurement boundaries to EEPROM
 void update_eeprom(void) {
 	eeprom_update_word(&nv_xlow, xlow);
 	eeprom_update_word(&nv_xhigh, xhigh);
@@ -266,6 +270,7 @@ void update_eeprom(void) {
 	eeprom_update_word(&nv_yhigh, yhigh);
 }
 
+// Zero measurement boundaries
 void reset_bounds(void) {
 	xlow = xhigh = ylow = yhigh = 0;
 	uart_puts_P("zeroed\r\n");
@@ -540,7 +545,7 @@ void sensor_status(void) {
 	dump_value_P("ping_cm=", ping_cm(), COMMA);
 	dump_value_P("heading=", magneto_heading(), COMMA);
 	dump_value_P("adc_l=", read_adc(0), COMMA);
-	dump_value_P("adc_r=", read_adc(1), NEWLINE);	
+	dump_value_P("adc_r=", read_adc(1), NEWLINE);
 }
 
 int main(void) {
@@ -627,7 +632,7 @@ int main(void) {
 		}
 
 		if (uart_available()) {
-			switch (uart_getc()) {
+			switch (tolower(uart_getc())) {
 				case 'w':
 					forward();
 					sensor_status();
@@ -672,7 +677,7 @@ int main(void) {
 					trim--;
 					constrain_trim();
 					break;
-				case 'e':
+				case 'm':
 					reset_bounds();
 					break;
 				case 'f':

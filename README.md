@@ -4,15 +4,15 @@
 ## Overview
 The quadruped robot uses the HC-SR04 module as eyes and it uses the LDRs to sense light. The HC-SR04 module is connected to PCINT10 and uses the 8-bit Timer0 interrupt to measure RTT. The LDRs are connected to ADC0 and ADC1.
 
-When an obstacle is detected within 30 cm distance, the robot turns in the brightest direction, using the magnetic heading to turn at least 75 degrees. When an obstacle is detected ahead within 15 cm distance, the robot reverses until no obstacle is detected within 30 cm distance and then turns to the brightest direction. The walking speed, robot height and leg positions are adjustable. Debugging data is sent to the hardware UART.
+When an obstacle is detected within 30 cm distance, the robot turns in the brightest direction, using the magnetic heading to turn at least 75 degrees. When an obstacle is detected ahead within 15 cm distance, the robot reverses until no obstacle is detected within 30 cm distance and then turns in the brightest direction. The walking speed, robot height and leg positions are adjustable. Debugging data is sent to the hardware UART.
 
 Eight servos are connected to PORTD and PORTB and are driven by a software PWM implementation using the 16-bit Timer1 output compare interrupt.
 
 The IR remote receiver uses the 8-bit Timer2 interrupt to collect data.
 
-Hardware I2C is used to read out the QMC5883L sensor. The raw readings are converted to a heading in degrees. Automatic scaling and centering data is stored in EEPROM.
+Hardware I2C is used to read out the QMC5883L sensor. The raw readings are converted to a heading in degrees. Automatic scaling and centering data is stored in EEPROM. At first run, make sure the robot makes a complete circle manually by using the right or left button.
 
-The robot can be controlled with an IR remote control and RS232 or BT.
+The robot can be controlled with an IR remote control or by the UART.
 
 ## Hardware
 * Atmel ATmega328P @ 16 MHz
@@ -43,10 +43,12 @@ U | Stand higher
 N | Stand lower
 T | Trim more
 I | Trim less
-E | Reset bounds
+M | Reset measurement bounds
 F | Move faster
 O | Move slower
 space | Autonomous gait algorithm
+
+Any other key will show current obstacle distance, robot heading and ADC values.
 
 ## IR Remote Control
 These NEC protocol based IR remote control keys are understood by the robot:
